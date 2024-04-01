@@ -1,2 +1,2 @@
 # getcapstatus.nvim
-This plugin provided a function that returns true if Caps lock is on and false otherwise.
+This plugin provides a function that returns true if Caps lock is on and false otherwise.
