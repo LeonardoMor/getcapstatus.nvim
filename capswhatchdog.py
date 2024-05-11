@@ -4,6 +4,9 @@ import subprocess
 import sys  # Import the sys module
 import time
 
+# Path to the lock file
+lock_file = "/tmp/capslock_script.lock"
+
 
 def detect_os():
     if platform.system().lower() == "windows":
@@ -45,11 +48,20 @@ def get_caps_lock(os):
 
 
 if __name__ == "__main__":
-    pipe_path = "/tmp/capslock_pipe"
-    if not os.path.exists(pipe_path):
-        os.mkfifo(pipe_path)
-    with open(pipe_path, "w") as pipe:
-        while True:
-            pipe.write(f"{get_caps_lock(detect_os())}\n")
-            pipe.flush()
-            time.sleep(0.5)
+    # Using a lock to just have one instance running. Might log something if there's already a lock
+    if os.path.exists(lock_file):
+        sys.exit(1)
+
+    open(lock_file, "a").close()
+
+    try:
+        pipe_path = "/tmp/capslock_pipe"
+        if not os.path.exists(pipe_path):
+            os.mkfifo(pipe_path)
+        with open(pipe_path, "w") as pipe:
+            while True:
+                pipe.write(f"{get_caps_lock(detect_os())}\n")
+                pipe.flush()
+                time.sleep(0.5)
+    finally:
+        os.remove(lock_file)
